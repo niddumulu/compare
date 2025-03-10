@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compare Link Produk With ProdukID</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+        textarea {
+            width: 300px;
+            height: 200px;
+            font-size: 14px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 14px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            width: 600px;
+        }
+        .copy-button {
+            margin-top: 10px;
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .copy-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Compare Link Produk With ProdukID</h2>
+    
+    <div class="container">
+        <div>
+            <h3>Kolom A (URL Shopee)</h3>
+            <textarea id="kolomA" placeholder="Masukkan URL Shopee di sini, satu per baris"></textarea>
+        </div>
+        
+        <div>
+            <h3>Kolom B (ID Produk)</h3>
+            <textarea id="kolomB" placeholder="Masukkan ID Produk di sini, satu per baris"></textarea>
+        </div>
+    </div>
+
+    <div class="result" id="result">
+        <h3>Hasil:</h3>
+        <p>Tunggu sebentar...</p>
+    </div>
+    
+    <!-- Tombol Salin Hasil -->
+    <button class="copy-button" id="copyButton" style="display:none;" onclick="copyResult()">Salin Hasil</button>
+
+    <script>
+        function compareColumns() {
+            // Ambil input dari kolom A dan B
+            const kolomA = document.getElementById('kolomA').value.trim().split('\n');
+            const kolomB = document.getElementById('kolomB').value.trim().split('\n');
+
+            // Buat array untuk hasil yang tidak ada di kolom B
+            let result = [];
+
+            // Periksa setiap URL di kolom A
+            kolomA.forEach(url => {
+                const productIdA = extractProductId(url); // Ambil ID produk dari URL
+                if (productIdA && !kolomB.includes(productIdA)) {
+                    result.push(url); // Masukkan URL jika ID tidak ditemukan di kolom B
+                }
+            });
+
+            // Tampilkan hasil
+            const resultDiv = document.getElementById('result');
+            const copyButton = document.getElementById('copyButton');
+
+            if (result.length > 0) {
+                resultDiv.innerHTML = '<h3>Hasil:</h3>' + result.join('<br>');
+                copyButton.style.display = 'inline'; // Tampilkan tombol salin
+            } else {
+                resultDiv.innerHTML = '<h3>Hasil:</h3><p>Tidak ada URL dari Kolom A yang tidak ada di Kolom B.</p>';
+                copyButton.style.display = 'none'; // Sembunyikan tombol salin jika tidak ada hasil
+            }
+        }
+
+        // Fungsi untuk mengekstrak ID produk dari URL Shopee
+        function extractProductId(url) {
+            const regex = /https:\/\/shopee\.co\.id\/product\/\d+\/(\d+)/;
+            const match = url.match(regex);
+            return match ? match[1] : null;
+        }
+
+        // Fungsi untuk menyalin hasil ke clipboard
+        function copyResult() {
+            const resultDiv = document.getElementById('result');
+            const range = document.createRange();
+            range.selectNode(resultDiv);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+            try {
+                document.execCommand('copy');
+                alert('Hasil berhasil disalin!');
+            } catch (err) {
+                alert('Gagal menyalin hasil.');
+            }
+            window.getSelection().removeAllRanges();
+        }
+
+        // Tambahkan event listener untuk update otomatis
+        document.getElementById('kolomA').addEventListener('input', compareColumns);
+        document.getElementById('kolomB').addEventListener('input', compareColumns);
+    </script>
+
+</body>
+</html>
